@@ -1,2 +1,2 @@
 # scrawler
-crawler with scrapy
+crawling with scrapy
