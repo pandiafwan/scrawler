@@ -1,20 +1,19 @@
 import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
-from urlparse import urlparse
 from scrapy.conf import settings
 import tldextract
 import pymongo
 
-class MySpider(CrawlSpider):
-    name = 'spider'
+class Inject(CrawlSpider):
+    name = 'inject'
 
     rules = (
         Rule(LinkExtractor(), callback='parse_item'),
     )
 
-    def __init__(self, url=None, *args, **kwargs):
-        super(MySpider, self).__init__(*args, **kwargs)
+    def __init__(self, url=None, crawlid=None, *args, **kwargs):
+        super(Inject, self).__init__(*args, **kwargs)
         self.start_urls = [url]
         extracted = tldextract.extract(url)
         connection = pymongo.MongoClient(
@@ -22,7 +21,7 @@ class MySpider(CrawlSpider):
             settings['MONGODB_PORT']
         )
         db = connection[settings['MONGODB_DB']]
-        self.collection = db[settings['MONGODB_COLLECTION']]
+        self.collection = db[crawlid]
 
 
     def parse_item(self, response):
