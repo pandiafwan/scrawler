@@ -2,7 +2,9 @@ import scrapy
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.linkextractors import LinkExtractor
 from urlparse import urlparse
+from scrapy.conf import settings
 import tldextract
+import pymongo
 
 class MySpider(CrawlSpider):
     name = 'spider'
@@ -15,6 +17,13 @@ class MySpider(CrawlSpider):
         super(MySpider, self).__init__(*args, **kwargs)
         self.start_urls = [url]
         extracted = tldextract.extract(url)
+        connection = pymongo.MongoClient(
+            settings['MONGODB_SERVER'],
+            settings['MONGODB_PORT']
+        )
+        db = connection[settings['MONGODB_DB']]
+        self.collection = db[settings['MONGODB_COLLECTION']]
+
 
     def parse_item(self, response):
         extracted = tldextract.extract(self.start_urls[0])
@@ -22,6 +31,6 @@ class MySpider(CrawlSpider):
         extracted = tldextract.extract(response.url)
         domain_response = "{}.{}".format(extracted.domain, extracted.suffix)
         if domain_response == domain_start:
-            file = open("crawldb/urls.list","a")
-            file.write(response.url+"\n")
-            file.close()
+            check_dedup = self.collection.find({"url" : response.url}).count()
+            if check_dedup == 0:
+                self.collection.insert({"url" : response.url})
