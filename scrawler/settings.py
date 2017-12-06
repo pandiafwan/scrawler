@@ -91,5 +91,3 @@ ROBOTSTXT_OBEY = True
 
 MONGODB_SERVER = "localhost"
 MONGODB_PORT = 27017
-MONGODB_DB = "scrawler"
-MONGODB_COLLECTION = "crawlid"

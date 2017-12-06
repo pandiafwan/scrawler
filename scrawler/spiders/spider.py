@@ -20,8 +20,8 @@ class Inject(CrawlSpider):
             settings['MONGODB_SERVER'],
             settings['MONGODB_PORT']
         )
-        db = connection[settings['MONGODB_DB']]
-        self.collection = db[crawlid]
+        db = connection[crawlid]
+        self.collection = db["injectUrl"]
 
 
     def parse_item(self, response):
@@ -32,4 +32,4 @@ class Inject(CrawlSpider):
         if domain_response == domain_start:
             check_dedup = self.collection.find({"url" : response.url}).count()
             if check_dedup == 0:
-                self.collection.insert({"url" : response.url})
+                self.collection.insert({"url":response.url, "crawled":0})
